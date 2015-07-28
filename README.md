@@ -2,7 +2,8 @@
 Maya CgFX Shaders
 ====
 
-Simple NPR shader demo in Maya.
+Simple NPR shader demos in Maya.
+This package includes the following NPR tchniques.
 * Lit-Sphere [Sloan et al. 2001]
 * X-Toon [Barla et al. 2006]
 
@@ -22,3 +23,7 @@ Simple NPR shader demo in Maya.
 
 You can load CgFX shaders (LitSphere.cgfx, XToon.cgfx) from a built-in Maya CgFXShader material node.
 Sample textures can be used to test the shading effect.
+
+## License
+
+The MIT License 2015 (c) tody
