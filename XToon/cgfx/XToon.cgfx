@@ -1,0 +1,155 @@
+/***************************
+	XToon CgFX shader.
+
+	(Diffuse, Specular) or (Diffuse, Sihoutte) effect can be desigend with 1 point light.
+***************************/
+
+//! Light position.
+float4 LightPos : Position <
+	string Object = "PointLight";
+	string UIName = "Light Position";
+	string Space = "World";
+> = {1.0f, 1.0f, 1.0f, 0.0f};
+
+//! 2D texture for XToon shading effects.
+texture XToonMap < string ResourceType = "2D"; string UIName = "XToon Map"; >;
+sampler2D XToonSampler = sampler_state
+{
+	Texture = <XToonMap>;
+  	MagFilter = Linear;
+  	MinFilter = LinearMipmapLinear;
+	WrapS = ClampToEdge;
+	WrapT = ClampToEdge;
+};
+
+//! Show diffuse shading term.
+float ShowDiffuse
+<
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Show Diffuse";
+> = 0.0;
+
+//! Show specular shading term.
+float ShowSpecular
+<
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Show Specular";
+> = 0.0;
+
+//! Show silhouette term.
+float ShowSilhouette
+<
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Show Silhouette";
+> = 0.0;
+
+//! Use silhouette effect for XToon texture.
+float SilhouetteEffect
+<
+    string UIWidget = "slider";
+    float UIMin = 0.0;
+    float UIMax = 1.0;
+    float UIStep = 0.01;
+    string UIName =  "Silhouette Effect";
+> = 0.0;
+
+/************* Built-in Matrix **************/
+#include <builtInMatrix.cgh>
+
+/************* DATA STRUCTS **************/
+//! Data from Maya to vertex shader (IN)
+struct appdata
+{
+    float4 Position	: POSITION;
+    float4 UV		: TEXCOORD0;
+    float4 Normal	: NORMAL;
+};
+
+//! Data from vertex shader (OUT) to pixel shader (IN).
+struct vertexOutput
+{
+    float4 HPosition	: POSITION;
+    float3 Pw   : TEXCOORD0; // World space position
+    float3 Nw   : TEXCOORD1; // World space normal vector
+    float3 Vw   : TEXCOORD2; // World space view vector
+};
+
+/************* VERTEX SHADERS **************/
+//! XToon vertex shader.
+vertexOutput XToonVS(appdata IN)
+{
+    vertexOutput OUT;
+
+    // Compute the transformed position
+    OUT.HPosition = mul(WorldViewProjXf,IN.Position);
+
+    float3 Nw = normalize( mul(WorldITXf,IN.Normal).xyz);
+    float3 Pw = mul(WorldXf, IN.Position).xyz;
+
+    float3 ViewPos = float3(ViewIXf[0].w,ViewIXf[1].w,ViewIXf[2].w);
+    float3 Vw = normalize(ViewPos - Pw);
+	OUT.Pw = Pw;
+	OUT.Nw = Nw;
+	OUT.Vw = Vw;
+    return OUT;
+}
+
+/************* PIXEL SHADERS **************/
+//! XToon pixel shader.
+float4 XToonPS(vertexOutput IN) : COLOR
+{
+	float3 N = normalize(IN.Nw);
+	float3 V = normalize(IN.Vw);
+	float3 L = normalize(LightPos - IN.Pw);
+
+	// Reflected view vector for Phong specular.
+	float3 RV = reflect(-V, N);
+
+	// Diffuse
+	float diffuseTerm = clamp( dot(L,N), 0.0, 1.0);
+
+	// Phong specular
+	float shinness = 1.0;
+	float LdRV = clamp( dot(L,RV), 0.0, 1.0);
+	float specularTerm = pow( LdRV, shinness);
+
+	// Silhouette
+	float sharpness = 2.0;
+	float VdN =  clamp( dot(V, N), 0.0, 1.0);
+	float silhouetteTerm = pow(VdN, sharpness);
+
+	float2 uv = float2(diffuseTerm, specularTerm);	// (Diffuse, Specular)
+	uv.y = lerp( uv.y, silhouetteTerm, SilhouetteEffect);	// (Diffuse, Silhouette)
+
+	float4 color = tex2D(XToonSampler, uv );
+	color = lerp(color, diffuseTerm, ShowDiffuse);	// Show diffuse term
+	color = lerp(color, specularTerm, ShowSpecular);	// Show specular term
+	color = lerp(color, 1.0 - silhouetteTerm, ShowSilhouette);	// Show silhouette term
+	color.a = 1.0;
+	return color;
+}
+
+/********* technique ********/
+//! XToon technique.
+technique XToon
+{
+	pass p0
+	{
+		CullFaceEnable=false;
+		DepthTestEnable=true;
+		DepthMask = true;
+		DepthFunc = LEqual;
+
+		VertexProgram = compile arbvp1 XToonVS();
+		FragmentProgram = compile arbfp1 XToonPS();
+	}
+}

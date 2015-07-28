@@ -1,0 +1,74 @@
+/***************************
+	Lit-Sphere CgFX shader.
+
+	2D texture shading is transferred to the target 3D model.
+***************************/
+//! Attribute for the input 2D color texture.
+texture colorMap < string ResourceType = "2D"; string UIName = "Color Map"; >;
+sampler2D colorSampler = sampler_state
+{
+    Texture = <colorMap>;
+    MagFilter = Linear;
+    MinFilter = LinearMipmapLinear;
+    WrapS = ClampToEdge;
+    WrapT = ClampToEdge;
+};
+
+/************* Built-in Matrix **************/
+#include <builtInMatrix.cgh>
+
+/************* DATA STRUCTS **************/
+//! Data from Maya to vertex shader (IN)
+struct appdata
+{
+    float4 Position : POSITION;
+    float4 UV       : TEXCOORD0;
+    float4 Normal   : NORMAL;
+};
+
+//! Data from vertex shader (OUT) to pixel shader (IN).
+struct vertexOutput
+{
+    float4 HPosition    : POSITION;
+    float3 Normal       : TEXCOORD0; // View space normal
+};
+
+/************* VERTEX SHADERS **************/
+//! Lit-Sphere vertex shader.
+vertexOutput litSphereVS(appdata IN)
+{
+    vertexOutput OUT;
+    // Compute the transformed position
+    OUT.HPosition = mul(WorldViewProjXf,IN.Position);
+    // Compute view space normal
+    float3 Nv = normalize( mul(WorldViewITXf,IN.Normal).xyz);
+    OUT.Normal = Nv;
+    return OUT;
+}
+
+/************* PIXEL SHADERS **************/
+//! Lit-Sphere pixel shader.
+float4 litSpherePS(vertexOutput IN) : COLOR
+{
+    float3 Nv = normalize(IN.Normal);
+    // Adjust the Nv range [-1,1] to the uv range [0,1]
+    float2 uv = float2(0.5) + 0.5 * float2(Nv.x, Nv.y);
+    float4 color = tex2D(colorSampler, uv );
+    return color;
+}
+
+/********* technique ********/
+//! Lit-Sphere technique.
+technique LitSphere
+{
+	pass p0
+	{
+		CullFaceEnable=false;
+		DepthTestEnable=true;
+		DepthMask = true;
+		DepthFunc = LEqual;
+
+		VertexProgram = compile arbvp1 litSphereVS();
+		FragmentProgram = compile arbfp1 litSpherePS();
+	}
+}

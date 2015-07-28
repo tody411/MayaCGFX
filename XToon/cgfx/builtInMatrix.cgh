@@ -1,0 +1,17 @@
+/***************************
+	Maya built in matrix.
+***************************/
+
+#ifndef _BUILT_IN_MATRIX_CGH_
+#define _BUILT_IN_MATRIX_CGH_
+
+float4x4 WorldITXf : 		WorldInverseTranspose < string UIWidget="None"; >;
+float4x4 WorldIXf : 		WorldInverse < string UIWidget="None"; >;
+float4x4 WorldViewITXf :	WorldViewInverseTranspose < string UIWidget="None"; >;
+float4x4 WorldViewProjXf :	WorldViewProjection < string UIWidget="None"; >;
+float4x4 WorldViewXf :		WorldView < string UIWidget="None"; >;
+float4x4 WorldXf :			World < string UIWidget="None"; >;
+float4x4 ViewIXf :			ViewInverse < string UIWidget="None"; >;
+float4x4 ViewXf :			View < string UIWidget="None"; >;
+
+#endif
