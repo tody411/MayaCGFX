@@ -3,21 +3,22 @@ Maya CgFX Shaders
 ====
 
 Simple NPR shader demo in Maya.
-* X-Toon [Barla et al. 2006]
 * Lit-Sphere [Sloan et al. 2001]
+* X-Toon [Barla et al. 2006]
 
-## Demo
-### X-Toon
-![X-Toon](XToon/results/XToon.png)
 
+## Result
 ### Lit-Sphere
 ![Lit-Sphere](LitSphere/results/LitSphere.png)
+
+### X-Toon
+![X-Toon](XToon/results/XToon.png)
 
 ## Usage
 ### Directory structure
 * ShaderDirectory
  - cgfx: main CgFx shader files.
- - sourceimages: texture files for the shader.
+ - sourceimages: sample texture files for the shader.
 
-Load CgFX shader file (in cgfx directory) with a built-in Maya CgFX shader.
-You can test the shader with sample textures.
+You can load CgFX shaders (LitSphere.cgfx, XToon.cgfx) from a built-in Maya CgFXShader material node.
+Sample textures can be used to test the shading effect.
