@@ -14,6 +14,10 @@ Simple NPR shader demo in Maya.
 ![Lit-Sphere](LitSphere/results/LitSphere.png)
 
 ## Usage
+### Directory structure
+* ShaderDirectory
+ - cgfx: main CgFx shader files.
+ - sourceimages: texture files for the shader.
 
 Load CgFX shader file (in cgfx directory) with a built-in Maya CgFX shader.
 You can test the shader with sample textures.
