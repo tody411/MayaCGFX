@@ -2,9 +2,9 @@
 Maya CgFX Shaders
 ***********
 
-Simple NPR shader demo for Maya.
-* X-Toon [Barla et al. 2006]
-* Lit-Sphere [Sloan et al. 2001]
+Simple NPR shader demo in Maya.
+ * X-Toon [Barla et al. 2006]
+ * Lit-Sphere [Sloan et al. 2001]
 
 ======
 Usage
