@@ -7,8 +7,10 @@ Simple NPR shader demo in Maya.
 * Lit-Sphere [Sloan et al. 2001]
 
 ## Demo
+### X-Toon
 ![X-Toon](XToon/results/XToon.png)
 
+### Lit-Sphere
 ![Lit-Sphere](LitSphere/results/LitSphere.png)
 
 ## Usage
